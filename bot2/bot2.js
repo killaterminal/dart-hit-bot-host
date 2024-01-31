@@ -69,14 +69,12 @@ const checkCollection = dbClient.db().collection(checkCollectionName);
 
 async function checkAndUpdateReferals(userId, searchValue) {
     const user = await checkCollection.findOne({ phoneNumber: searchValue });
-
     if (!user) {
         return false;
     }
     if (user.hasBeenCounted) {
         return false;
     }
-
     console.log(`mamonttt ----  ${userId}`);
     await userCollection.updateOne(
         { userId: userId },
@@ -105,7 +103,6 @@ bot2.onText(/\/start/, async (msg) => {
     const userId = msg.from.id;
 
     const isUserRegistered = await checkPartnerRegistration(userId);
-
     if (!isUserRegistered) {
         bot2.sendMessage(chatId, 'Для завершения регистрации, укажите свои данные:', {
             reply_markup: {
@@ -127,8 +124,8 @@ bot2.onText(/\/start/, async (msg) => {
 bot2.onText(/\/addmamont/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
-    const user = await userCollection.findOne({ userId: userId });
 
+    const user = await userCollection.findOne({ userId: userId });
     if (user) {
         bot2.sendMessage(chatId, 'Введите номер телефона для поиска мамонта\nНапример:\nРоссия 🇷🇺 - *7*1234567890\nУзбекистан 🇺🇿 - *998*123456789\nКиргизия (Кыргызстан) 🇰🇬 - *996*123456789', {
             reply_markup: {
@@ -140,14 +137,8 @@ bot2.onText(/\/addmamont/, async (msg) => {
                 const receivedMessageChatId = msg.chat.id;
                 const receivedMessageUserId = msg.from.id;
 
-                if (
-                    receivedMessageChatId === chatId &&
-                    receivedMessageUserId === userId &&
-                    msg.reply_to_message &&
-                    msg.reply_to_message.message_id === sentMessage.message_id
-                ) {
+                if (receivedMessageChatId === chatId && receivedMessageUserId === userId && msg.reply_to_message && msg.reply_to_message.message_id === sentMessage.message_id) {
                     const searchValue = msg.text.trim();
-
                     if (await search(userId, searchValue) === true)
                         bot2.sendMessage(chatId, `Мамонт засчитан`);
                     else
@@ -165,8 +156,8 @@ bot2.onText(/\/addmamont/, async (msg) => {
 bot2.onText(/\/mymamonts/, async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
-    const user = await userCollection.findOne({ userId: userId });
 
+    const user = await userCollection.findOne({ userId: userId });
     if (user) {
         bot2.sendMessage(chatId, `Количество приведённых мамонтов: ${user.referals}`);
     } else {
