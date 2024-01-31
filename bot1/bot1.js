@@ -220,14 +220,15 @@ bot.on('text', async (msg) => {
                 } else {
                     userSelectedDartType == 'dart_0';
                 }
-                
+
                 break;
             case `💸 Ставка [${bet} 💎]`:
                 bot.sendMessage(chatId, 'Введите вашу ставку:');
                 global.awaitingBetInput = userId;
                 break;
             case `🚀 Множитель [x${k}]`:
-                await handleMultiplyCommand(chatId, userId, inputText);
+                bot.sendMessage(chatId, 'Введите новое значение множителя (не больше 100):');
+                awaitingMultiplierInput = userId;
                 break;
             case `💰 Баланс [${user.balance} 💎]`:
                 await handleBalanceCommand(chatId);
@@ -273,15 +274,15 @@ async function handleMultiplyCommand(chatId, userId, inputText) {
         bot.sendMessage(chatId, 'Пожалуйста, введите корректное положительное число для множителя (не больше 100).');
     }
 
-    activeKeyboard = null;  
+    activeKeyboard = null;
 }
 
 bot.on('text', async (msg) => {
-  const chatId = msg.chat.id;
+    const chatId = msg.chat.id;
     const userId = msg.from.id;
 
     if (awaitingMultiplierInput === userId) {
-        await handleMultiplierInput(chatId, userId, msg.text);
+        await handleMultiplyCommand(chatId, userId, msg.text);
         awaitingMultiplierInput = null;
     }
 });
@@ -317,7 +318,7 @@ function calculateDartResult(dartType) {
     }
 }
 
-const fs = require('fs');
+
 async function handleThrowDart(chatId, userId, userSelectedDartType) {
     const user = await userCollection.findOne({ userId: userId });
 
@@ -334,31 +335,18 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
         return;
     }
 
-    const dartOptions = ['dart_0', 'dart_1', 'dart_2', 'dart_jackpot'];
-
-    const probabilities = dartOptions.map(dart => {
-        if (dart === userSelectedDartType) {
-            return user.luck / 100;
-        } else {
-            return (100 - user.luck) / (dartOptions.length - 1) / 100;
-        }
-    });
-
-    const totalProbability = probabilities.reduce((sum, prob) => sum + prob, 0);
-
-    const randomValue = Math.random() * totalProbability;
-
     let dartType;
-    let cumulativeProbability = 0;
 
-    for (let i = 0; i < dartOptions.length; i++) {
-        cumulativeProbability += probabilities[i];
-        if (randomValue <= cumulativeProbability) {
-            dartType = dartOptions[i];
-            break;
-        }
+    if (user.luck === 50) {
+        // Алгоритм для удачи 50%
+        const dartOptions = ['dart_0', 'dart_2', 'dart_jackpot', 'dart_2', 'dart_1', 'dart_1'];
+        dartType = dartOptions.shift();
+        dartOptions.push(dartType);
+    } else {
+        // Алгоритм для других уровней удачи
+        const dartOptions = ['dart_0', 'dart_1', 'dart_2', 'dart_jackpot'];
+        dartType = dartOptions[Math.floor(Math.random() * dartOptions.length)];
     }
-
     const isWin = dartType === userSelectedDartType;
 
     console.log(`rand dart - ${dartType}\tuser dart - ${userSelectedDartType}`);
