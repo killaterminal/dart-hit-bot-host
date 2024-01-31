@@ -1,0 +1,16 @@
+{
+  "name": "bot2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot2.js",
+  "scripts": {
+    "start": "node bot2.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "node-telegram-bot-api": "^0.64.0"
+  }
+}
