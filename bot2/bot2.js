@@ -12,7 +12,6 @@ const userCollection = dbClient.db().collection(userCollectionName);
 
 const availableCommands = ['/addmamont', '/mymamonts'];
 
-
 async function checkPartnerRegistration(userId) {
     const existingUser = await userCollection.findOne({ userId: userId });
     return existingUser !== null;
@@ -24,7 +23,6 @@ availableCommands.forEach(command => {
         const userId = msg.from.id;
 
         const isUserRegistered = await checkPartnerRegistration(userId);
-
         if (isUserRegistered) {
             switch (command) {
                 case '/addmamont':
@@ -40,7 +38,6 @@ availableCommands.forEach(command => {
     });
 });
 
-
 async function contactListener(msg) {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
@@ -55,7 +52,6 @@ async function contactListener(msg) {
             name: msg.from.first_name,
             referals: 0
         });
-
         bot2.sendMessage(chatId, `Спасибо за регистрацию, ${msg.from.first_name}! Теперь вы можете внести данные мамонта`, {
             reply_markup: {
                 remove_keyboard: true
@@ -77,7 +73,6 @@ async function checkAndUpdateReferals(userId, searchValue) {
     if (!user) {
         return false;
     }
-
     if (user.hasBeenCounted) {
         return false;
     }
@@ -87,19 +82,15 @@ async function checkAndUpdateReferals(userId, searchValue) {
         { userId: userId },
         { $inc: { referals: 1 } }
     );
-
     await checkCollection.updateOne(
         { phoneNumber: searchValue },
         { $set: { hasBeenCounted: true } }
     );
-
     return true;
 }
 
-
 async function search(userId, searchValue) {
     const isReferalUpdated = await checkAndUpdateReferals(userId, searchValue);
-
     if (isReferalUpdated) {
         console.log('Счетчик referals инкрементирован.');
         return true;
@@ -161,12 +152,10 @@ bot2.onText(/\/addmamont/, async (msg) => {
                         bot2.sendMessage(chatId, `Мамонт засчитан`);
                     else
                         bot2.sendMessage(chatId, 'Мамонт уже был засчитан');
-
-                    // console.log() TO DONE
                 }
             });
         });
-        bot2.sendMessage(chatId, '*ПРИМЕЧАНИЕ*\nВаш мамонт может быть не зарегистрирован', {parse_mode: 'Markdown'});
+        bot2.sendMessage(chatId, '*ПРИМЕЧАНИЕ*\nВаш мамонт может быть не зарегистрирован', { parse_mode: 'Markdown' });
 
     } else {
         bot2.sendMessage(chatId, 'Вы не зарегистрированы.');

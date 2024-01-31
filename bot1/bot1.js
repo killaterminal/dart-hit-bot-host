@@ -79,7 +79,6 @@ let userSelectedDartType = null;
 //play command
 async function handlePlayCommand(chatId, userId) {
     const user = await userCollection.findOne({ userId: userId });
-
     const inlineKeyboard = {
         inline_keyboard: [
             [{ text: 'Мимо мишени', callback_data: 'dart_0' }],
@@ -88,11 +87,9 @@ async function handlePlayCommand(chatId, userId) {
             [{ text: 'В яблочко', callback_data: 'dart_jackpot' }]
         ]
     };
-
     const inlineMessageOptions = {
         reply_markup: JSON.stringify(inlineKeyboard),
     };
-
 
     const keyboard = {
         keyboard: [
@@ -102,16 +99,13 @@ async function handlePlayCommand(chatId, userId) {
         ],
         resize_keyboard: true,
     };
-
     const messageOptions = {
         reply_markup: JSON.stringify(keyboard),
     };
-
     activeKeyboard = messageOptions.reply_markup;
 
     await bot.sendMessage(chatId, `Игра началась`, messageOptions);
     await bot.sendMessage(chatId, `Выберите вариант броска дротика:`, inlineMessageOptions);
-
     if (userSelectedDartType !== null) {
         await handleThrowDart(chatId, userId, userSelectedDartType);
         userSelectedDartType = null;
@@ -127,17 +121,14 @@ async function handleHelpCommand(chatId) {
 async function handleDepositCommand(chatId, userId) {
     const user = await userCollection.findOne({ userId: userId });
     bot.sendMessage(chatId, 'Пополнение Вашего баланса', { reply_markup: { remove_keyboard: true } });
-
     if (user) {
         const depositButtons = user.deposit_amounts.map(amount => ({
             text: `${amount} USD`,
             callback_data: `deposit_${amount}`
         }));
-
         const keyboard = {
             inline_keyboard: [depositButtons]
         };
-
         bot.sendMessage(chatId, 'Выберите сумму для пополнения:', {
             reply_markup: keyboard
         });
@@ -149,7 +140,6 @@ async function handleDepositCommand(chatId, userId) {
 async function handlePayoutCommand(chatId, userId) {
     const user = await userCollection.findOne({ userId: userId });
     bot.sendMessage(chatId, 'Вывод средств с Вашего баланса', { reply_markup: { remove_keyboard: true } });
-
     if (user) {
         bot.sendMessage(chatId, `Ваш текущий баланс: ${user.balance} USD. Для вывода средств обратитесь к вашему менеджеру для дальнейшей поддержки.\nМинимальная сумма для вывода: ${user.min_balance_to_payout} USD.`);
     } else {
@@ -171,7 +161,6 @@ availableCommands.forEach(command => {
         const userId = msg.from.id;
 
         const isUserRegistered = await checkUserRegistration(userId);
-
         if (isUserRegistered) {
             switch (command) {
                 case '/play':
@@ -208,8 +197,8 @@ let awaitingMultiplierInput = null;
 bot.on('text', async (msg) => {
     const chatId = msg.chat.id;
     const userId = msg.from.id;
-    const user = await userCollection.findOne({ userId: userId });
 
+    const user = await userCollection.findOne({ userId: userId });
     if (user) {
         switch (msg.text) {
             case '🎯 Бросить дротик':
@@ -220,7 +209,6 @@ bot.on('text', async (msg) => {
                 } else {
                     userSelectedDartType == 'dart_0';
                 }
-
                 break;
             case `💸 Ставка [${bet} 💎]`:
                 bot.sendMessage(chatId, 'Введите вашу ставку:');
@@ -238,42 +226,34 @@ bot.on('text', async (msg) => {
                 // Ваш код для работы с валютой
                 break;
             default:
-                // Обработка других текстовых сообщений
                 break;
         }
-
-
     } else {
         bot.sendMessage(chatId, 'Пользователь не зарегистрирован');
     }
 });
 bot.on('text', async (msg) => {
     const userId = msg.from.id;
-
     if (global.awaitingBetInput === userId) {
         const betAmount = parseFloat(msg.text);
-
         if (!isNaN(betAmount) && betAmount >= 0 && betAmount <= 200) {
             bet = betAmount;
             bot.sendMessage(msg.chat.id, `Ваша ставка: ${bet}💎`);
         } else {
             bot.sendMessage(msg.chat.id, 'Пожалуйста, введите корректное число от 1 до 200.');
         }
-
         global.awaitingBetInput = null;
     }
 });
 
-async function handleMultiplyCommand(chatId, userId, inputText) {
+async function handleMultiplyCommand(chatId, inputText) {
     const multiplierValue = parseFloat(inputText);
-
     if (!isNaN(multiplierValue) && multiplierValue > 0 && multiplierValue <= 100) {
         k = multiplierValue;
         bot.sendMessage(chatId, `Множитель успешно установлен: x${k}`);
     } else {
         bot.sendMessage(chatId, 'Пожалуйста, введите корректное положительное число для множителя (не больше 100).');
     }
-
     activeKeyboard = null;
 }
 
@@ -287,7 +267,6 @@ bot.on('text', async (msg) => {
     }
 });
 
-
 async function handleBalanceCommand(chatId) {
     const keyboard = {
         inline_keyboard: [
@@ -295,11 +274,9 @@ async function handleBalanceCommand(chatId) {
             [{ text: 'Пополнить баланс', callback_data: 'deposit_dollars' }]
         ]
     };
-
     const messageOptions = {
         reply_markup: JSON.stringify(keyboard),
     };
-
     await bot.sendMessage(chatId, 'Выберите действие:', messageOptions);
 }
 
@@ -318,10 +295,8 @@ function calculateDartResult(dartType) {
     }
 }
 
-
 async function handleThrowDart(chatId, userId, userSelectedDartType) {
     const user = await userCollection.findOne({ userId: userId });
-
     if (!user) {
         bot.sendMessage(chatId, 'Пользователь не найден. Пожалуйста, зарегистрируйтесь.');
         return;
@@ -336,7 +311,6 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
     }
 
     let dartType;
-
     if (user.luck === 50) {
         // Алгоритм для удачи 50%
         const dartOptions = ['dart_0', 'dart_2', 'dart_jackpot', 'dart_2', 'dart_1', 'dart_1'];
@@ -378,7 +352,6 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
         : `Увы, вы проиграли ${bet}💎\nВаш баланс: ${user.balance - bet}💎`;
 
     bot.sendMessage(chatId, resultMessage);
-
     const inlineKeyboard = {
         inline_keyboard: [
             [{ text: 'Мимо мишени', callback_data: 'dart_0' }],
@@ -387,11 +360,9 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
             [{ text: 'В яблочко', callback_data: 'dart_jackpot' }]
         ]
     };
-
     const inlineMessageOptions = {
         reply_markup: JSON.stringify(inlineKeyboard),
     };
-
     await bot.sendMessage(chatId, `Выберите вариант броска дротика:`, inlineMessageOptions);
 }
 
