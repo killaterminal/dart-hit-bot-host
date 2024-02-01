@@ -148,13 +148,14 @@ async function handlePayoutCommand(chatId, userId) {
 }
 //rules command
 async function handleRulesCommand(chatId) {
-    bot.sendMessage(chatId, 'Правила игры..', { reply_markup: { remove_keyboard: true } });
+    bot.sendMessage(chatId, 'Правила игры', { reply_markup: { remove_keyboard: true } });
+    bot.sendMessage(chatId, 'Для начала Вам нужно пополнить Ваш счёт для игры. Можете перейти по команде /deposit. После пополнения выбирайте удобную для Вас валюту. После этого делайте ставку (от 1 до 200 единиц). Бросаете дротик и выигруете!\nУдачи Вам!', { reply_markup: { remove_keyboard: true } });
 }
 //support command
 async function handleSupportCommand(chatId) {
     bot.sendMessage(chatId, 'С тобой бог!', { reply_markup: { remove_keyboard: true } });
 }
-
+//command methods
 availableCommands.forEach(command => {
     bot.onText(new RegExp(`^${command}$`), async (msg) => {
         const chatId = msg.chat.id;
@@ -246,6 +247,7 @@ bot.on('text', async (msg) => {
     }
 });
 
+//play buttons commands
 async function handleMultiplyCommand(chatId, inputText) {
     const multiplierValue = parseFloat(inputText);
     if (!isNaN(multiplierValue) && multiplierValue > 0 && multiplierValue <= 100) {
@@ -256,16 +258,6 @@ async function handleMultiplyCommand(chatId, inputText) {
     }
     activeKeyboard = null;
 }
-
-bot.on('text', async (msg) => {
-    const chatId = msg.chat.id;
-    const userId = msg.from.id;
-
-    if (awaitingMultiplierInput === userId) {
-        await handleMultiplyCommand(chatId, userId, msg.text);
-        awaitingMultiplierInput = null;
-    }
-});
 
 async function handleBalanceCommand(chatId) {
     const keyboard = {
@@ -278,21 +270,6 @@ async function handleBalanceCommand(chatId) {
         reply_markup: JSON.stringify(keyboard),
     };
     await bot.sendMessage(chatId, 'Выберите действие:', messageOptions);
-}
-
-function calculateDartResult(dartType) {
-    switch (dartType) {
-        case 'dart_1':
-            return 1;
-        case 'dart_2':
-            return 1;
-        case 'dart_0':
-            return 1;
-        case 'dart_jackpot':
-            return 1;
-        default:
-            return 1;
-    }
 }
 
 async function handleThrowDart(chatId, userId, userSelectedDartType) {
@@ -310,18 +287,10 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
         return;
     }
 
-    let dartType;
-    if (user.luck === 50) {
-        // Алгоритм для удачи 50%
-        const dartOptions = ['dart_0', 'dart_2', 'dart_jackpot', 'dart_2', 'dart_1', 'dart_1'];
-        dartType = dartOptions.shift();
-        dartOptions.push(dartType);
-    } else {
-        // Алгоритм для других уровней удачи
-        const dartOptions = ['dart_0', 'dart_1', 'dart_2', 'dart_jackpot'];
-        dartType = dartOptions[Math.floor(Math.random() * dartOptions.length)];
-    }
-    const isWin = dartType === userSelectedDartType;
+    const isWin = Math.random() < user.luck / 100;
+
+    const dartOptions = ['dart_0', 'dart_1', 'dart_2', 'dart_jackpot'];
+    const dartType = dartOptions[Math.floor(Math.random() * dartOptions.length)];
 
     console.log(`rand dart - ${dartType}\tuser dart - ${userSelectedDartType}`);
     const dartResult = calculateDartResult(dartType);
@@ -332,20 +301,6 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
     await userCollection.updateOne({ userId: userId }, {
         $set: { balance: newBalance }
     });
-
-    if (isWin) {
-        wins++;
-        if (wins === 3) {
-            k = 1.5;
-        } else if (wins === 6) {
-            k = 2;
-        } else if (wins === 10) {
-            k = 5;
-        }
-    } else {
-        wins = 0;
-        k = 1;
-    }
 
     const resultMessage = isWin
         ? `Поздравляем! Вы выиграли ${winnings}💎\nВаш баланс: ${user.balance + winnings}💎`
@@ -366,6 +321,29 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
     await bot.sendMessage(chatId, `Выберите вариант броска дротика:`, inlineMessageOptions);
 }
 
+bot.on('text', async (msg) => {
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+
+    if (awaitingMultiplierInput === userId) {
+        await handleMultiplyCommand(chatId, userId, msg.text);
+        awaitingMultiplierInput = null;
+    }
+});
+function calculateDartResult(dartType) {
+    switch (dartType) {
+        case 'dart_1':
+            return 1;
+        case 'dart_2':
+            return 1;
+        case 'dart_0':
+            return 1;
+        case 'dart_jackpot':
+            return 1;
+        default:
+            return 1;
+    }
+}
 bot.on('callback_query', async (query) => {
     const userId = query.from.id;
     const chatId = query.message.chat.id;

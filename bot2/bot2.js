@@ -90,10 +90,8 @@ async function checkAndUpdateReferals(userId, searchValue) {
 async function search(userId, searchValue) {
     const isReferalUpdated = await checkAndUpdateReferals(userId, searchValue);
     if (isReferalUpdated) {
-        console.log('Счетчик referals инкрементирован.');
         return true;
     } else {
-        console.log('Объект не найден в таблице users.');
         return false;
     }
 }
