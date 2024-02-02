@@ -14,7 +14,6 @@ async function checkUserRegistration(userId) {
     const existingUser = await userCollection.findOne({ userId: userId });
     return existingUser !== null;
 }
-
 async function contactListener(msg) {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
