@@ -289,13 +289,13 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
         const dartOptions = ['dart_0', 'dart_1', 'dart_2', 'dart_jackpot'];
         const dartType = dartOptions[Math.floor(Math.random() * dartOptions.length)];
 
-        const isWin = Math.random() < user.luck / 100;
+        const isWin = dartType === userSelectedDartType && Math.random() < user.luck / 100;
         console.log(`rand dart - ${dartType}\tuser dart - ${userSelectedDartType}`);
 
         const dartResult = calculateDartResult(dartType);
         const winnings = isWin ? Math.ceil(bet * dartResult * k) : 0;
         const newBalance = isWin ? user.balance + winnings : user.balance - bet;
-        
+
         await userCollection.updateOne({ userId: userId }, {
             $set: { balance: newBalance }
         });
