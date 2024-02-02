@@ -54,7 +54,7 @@ async function contactListener(msg) {
 
 bot.on('contact', contactListener);
 
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, 'Добро пожаловать! Для завершения регистрации, укажите свои данные:', {
         reply_markup: {
