@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const { connectToDatabase, getClient } = require('./database');
 
 const token = '6927474264:AAFRSj-B9Knl-ejfsOKm_S0fLgpS8rA1-Ng';
-const bot = new TelegramBot(token, { polling: false });
+const bot = new TelegramBot(token, { polling: true });
 
 connectToDatabase();
 
