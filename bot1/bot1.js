@@ -250,8 +250,8 @@ bot.on('text', async (msg) => {
     const chatId = msg.chat.id;
 
     if (awaitingMultiplierInput !== null) {
-        const inputText = msg.text;
-        if (!isNaN(inputText) && parseFloat(inputText) >= 0 && parseFloat(inputText) <= 100) {
+        const inputText = parseFloat(msg.text);
+        if (!isNaN(inputText) && inputText >= 0 && inputText <= 100) {
             await handleMultiplyCommand(chatId, inputText);
             awaitingMultiplierInput = null;
         } else {
@@ -259,7 +259,6 @@ bot.on('text', async (msg) => {
         }
     }
 });
-
 
 //play buttons commands
 async function handleMultiplyCommand(chatId, inputText) {
