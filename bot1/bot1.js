@@ -192,7 +192,7 @@ availableCommands.forEach(command => {
 });
 
 let k = 1;
-let awaitingMultiplierInput = null;
+let awaitingMultiplierInput = 1;
 
 bot.on('text', async (msg) => {
     const chatId = msg.chat.id;
