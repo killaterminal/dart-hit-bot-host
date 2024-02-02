@@ -192,7 +192,6 @@ availableCommands.forEach(command => {
 });
 
 let k = 1;
-let wins = 0;
 let awaitingMultiplierInput = null;
 
 bot.on('text', async (msg) => {
@@ -273,52 +272,54 @@ async function handleBalanceCommand(chatId) {
 }
 
 async function handleThrowDart(chatId, userId, userSelectedDartType) {
-    const user = await userCollection.findOne({ userId: userId });
-    if (!user) {
-        bot.sendMessage(chatId, 'Пользователь не найден. Пожалуйста, зарегистрируйтесь.');
-        return;
+    try {
+        const user = await userCollection.findOne({ userId: userId });
+        if (!user) {
+            bot.sendMessage(chatId, 'Пользователь не найден. Пожалуйста, зарегистрируйтесь.');
+            return;
+        }
+        if (user.balance < bet) {
+            bot.sendMessage(chatId, 'У вас недостаточно средств для броска дротика. Пополните баланс и попробуйте снова.');
+            return;
+        }
+        if (bet == 0 || bet < 0) {
+            bot.sendMessage(chatId, 'Минимальная ставка 1');
+            return;
+        }
+        const dartOptions = ['dart_0', 'dart_1', 'dart_2', 'dart_jackpot'];
+        const dartType = dartOptions[Math.floor(Math.random() * dartOptions.length)];
+
+        const isWin = Math.random() < user.luck / 100;
+        console.log(`rand dart - ${dartType}\tuser dart - ${userSelectedDartType}`);
+
+        const dartResult = calculateDartResult(dartType);
+        const winnings = isWin ? Math.ceil(bet * dartResult * k) : 0;
+        const newBalance = isWin ? user.balance + winnings : user.balance - bet;
+        
+        await userCollection.updateOne({ userId: userId }, {
+            $set: { balance: newBalance }
+        });
+
+        const resultMessage = isWin
+            ? `Поздравляем! Вы выиграли ${winnings}💎\nВаш баланс: ${user.balance + winnings}💎`
+            : `Увы, вы проиграли ${bet}💎\nВаш баланс: ${user.balance - bet}💎`;
+
+        bot.sendMessage(chatId, resultMessage);
+        const inlineKeyboard = {
+            inline_keyboard: [
+                [{ text: 'Мимо мишени', callback_data: 'dart_0' }],
+                [{ text: 'Внешний круг мишени', callback_data: 'dart_2' }],
+                [{ text: 'Внутренний круг мишени', callback_data: 'dart_1' }],
+                [{ text: 'В яблочко', callback_data: 'dart_jackpot' }]
+            ]
+        };
+        const inlineMessageOptions = {
+            reply_markup: JSON.stringify(inlineKeyboard),
+        };
+        await bot.sendMessage(chatId, `Выберите вариант броска дротика:`, inlineMessageOptions);
+    } catch (error) {
+        console.error('Ошибка при обработке броска дротика:', error);
     }
-    if (user.balance < bet) {
-        bot.sendMessage(chatId, 'У вас недостаточно средств для броска дротика. Пополните баланс и попробуйте снова.');
-        return;
-    }
-    if (bet == 0 || bet < 0) {
-        bot.sendMessage(chatId, 'Минимальная ставка 1');
-        return;
-    }
-
-    const isWin = Math.random() < user.luck / 100;
-
-    const dartOptions = ['dart_0', 'dart_1', 'dart_2', 'dart_jackpot'];
-    const dartType = dartOptions[Math.floor(Math.random() * dartOptions.length)];
-
-    console.log(`rand dart - ${dartType}\tuser dart - ${userSelectedDartType}`);
-    const dartResult = calculateDartResult(dartType);
-
-    const winnings = isWin ? Math.ceil(bet * dartResult * k) : 0;
-
-    const newBalance = isWin ? user.balance + winnings : user.balance - bet;
-    await userCollection.updateOne({ userId: userId }, {
-        $set: { balance: newBalance }
-    });
-
-    const resultMessage = isWin
-        ? `Поздравляем! Вы выиграли ${winnings}💎\nВаш баланс: ${user.balance + winnings}💎`
-        : `Увы, вы проиграли ${bet}💎\nВаш баланс: ${user.balance - bet}💎`;
-
-    bot.sendMessage(chatId, resultMessage);
-    const inlineKeyboard = {
-        inline_keyboard: [
-            [{ text: 'Мимо мишени', callback_data: 'dart_0' }],
-            [{ text: 'Внешний круг мишени', callback_data: 'dart_2' }],
-            [{ text: 'Внутренний круг мишени', callback_data: 'dart_1' }],
-            [{ text: 'В яблочко', callback_data: 'dart_jackpot' }]
-        ]
-    };
-    const inlineMessageOptions = {
-        reply_markup: JSON.stringify(inlineKeyboard),
-    };
-    await bot.sendMessage(chatId, `Выберите вариант броска дротика:`, inlineMessageOptions);
 }
 
 bot.on('text', async (msg) => {
