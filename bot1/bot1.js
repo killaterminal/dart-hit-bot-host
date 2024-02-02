@@ -327,13 +327,18 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
 
 bot.on('text', async (msg) => {
     const chatId = msg.chat.id;
-    const userId = msg.from.id;
 
-    if (awaitingMultiplierInput === userId) {
-        await handleMultiplyCommand(chatId, msg.text);
-        awaitingMultiplierInput = null;
+    if (awaitingMultiplierInput !== null) {
+        const inputText = msg.text;
+        if (!isNaN(inputText) && parseFloat(inputText) >= 0 && parseFloat(inputText) <= 100) {
+            await handleMultiplyCommand(chatId, inputText);
+            awaitingMultiplierInput = null;
+        } else {
+            bot.sendMessage(chatId, 'Пожалуйста, введите корректное положительное число для множителя (не больше 100).');
+        }
     }
 });
+
 function calculateDartResult(dartType) {
     switch (dartType) {
         case 'dart_1':
