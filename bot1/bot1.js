@@ -247,7 +247,7 @@ bot.on('text', async (msg) => {
 });
 
 //play buttons commands
-async function handleMultiplyCommand(chatId, userId, inputText) {
+async function handleMultiplyCommand(chatId, inputText) {
     console.log(`inputText: ${inputText}`);
     const multiplierValue = parseFloat(inputText);
     console.log(`multiplierValue: ${multiplierValue}`);
@@ -320,6 +320,7 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
         };
         await bot.sendMessage(chatId, `Выберите вариант броска дротика:`, inlineMessageOptions);
     } catch (error) {
+        await bot.sendMessage(chatId, `Ошибка при обработке броска дротика, попробуйте позже.`, inlineMessageOptions);
         console.error('Ошибка при обработке броска дротика:', error);
     }
 }
@@ -329,7 +330,7 @@ bot.on('text', async (msg) => {
     const userId = msg.from.id;
 
     if (awaitingMultiplierInput === userId) {
-        await handleMultiplyCommand(chatId, userId, msg.text);
+        await handleMultiplyCommand(chatId, msg.text);
         awaitingMultiplierInput = null;
     }
 });
