@@ -246,6 +246,21 @@ bot.on('text', async (msg) => {
     }
 });
 
+bot.on('text', async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (awaitingMultiplierInput !== null) {
+        const inputText = msg.text;
+        if (!isNaN(inputText) && parseFloat(inputText) >= 0 && parseFloat(inputText) <= 100) {
+            await handleMultiplyCommand(chatId, inputText);
+            awaitingMultiplierInput = null;
+        } else {
+            bot.sendMessage(chatId, 'Пожалуйста, введите корректное положительное число для множителя (не больше 100).');
+        }
+    }
+});
+
+
 //play buttons commands
 async function handleMultiplyCommand(chatId, inputText) {
     console.log(`inputText: ${inputText}`);
@@ -324,20 +339,6 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
         console.error('Ошибка при обработке броска дротика:', error);
     }
 }
-
-bot.on('text', async (msg) => {
-    const chatId = msg.chat.id;
-
-    if (awaitingMultiplierInput !== null) {
-        const inputText = msg.text;
-        if (!isNaN(inputText) && parseFloat(inputText) >= 0 && parseFloat(inputText) <= 100) {
-            await handleMultiplyCommand(chatId, inputText);
-            awaitingMultiplierInput = null;
-        } else {
-            bot.sendMessage(chatId, 'Пожалуйста, введите корректное положительное число для множителя (не больше 100).');
-        }
-    }
-});
 
 function calculateDartResult(dartType) {
     switch (dartType) {
