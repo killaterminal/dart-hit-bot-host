@@ -15,7 +15,6 @@ async function checkUserRegistration(userId) {
     return existingUser !== null;
 }
 
-
 async function contactListener(msg) {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
@@ -248,7 +247,7 @@ bot.on('text', async (msg) => {
 });
 
 //play buttons commands
-async function handleMultiplyCommand(chatId, inputText) {
+async function handleMultiplyCommand(chatId, userId, inputText) {
     console.log(`inputText: ${inputText}`);
     const multiplierValue = parseFloat(inputText);
     console.log(`multiplierValue: ${multiplierValue}`);
