@@ -14,6 +14,7 @@ async function checkUserRegistration(userId) {
     const existingUser = await userCollection.findOne({ userId: userId });
     return existingUser !== null;
 }
+
 async function contactListener(msg) {
     const userId = msg.from.id;
     const chatId = msg.chat.id;
@@ -92,7 +93,7 @@ async function handlePlayCommand(chatId, userId) {
 
     const keyboard = {
         keyboard: [
-            [{ text: '🎯 Бросить дротик хуётик' }],
+            [{ text: '🎯 Бросить дротик' }],
             [{ text: `💸 Ставка [${bet} 💎]` }, { text: `🚀 Множитель [x${k}]` }],
             [{ text: `💰 Баланс [${user.balance} 💎]` }, { text: '🏧 Валюта [💎]' }],
         ],
@@ -230,16 +231,6 @@ bot.on('text', async (msg) => {
     } else {
         bot.sendMessage(chatId, 'Пользователь не зарегистрирован');
     }
-
-    if (awaitingMultiplierInput !== null) {
-        const inputText = msg.text;
-        if (!isNaN(inputText) && parseFloat(inputText) >= 0 && parseFloat(inputText) <= 100) {
-            await handleMultiplyCommand(chatId, inputText);
-            awaitingMultiplierInput = null;
-        } else {
-            bot.sendMessage(chatId, 'Пожалуйста, введите корректное положительное число для множителя (не больше 100).');
-        }
-    }
 });
 bot.on('text', async (msg) => {
     const userId = msg.from.id;
@@ -333,6 +324,20 @@ async function handleThrowDart(chatId, userId, userSelectedDartType) {
         console.error('Ошибка при обработке броска дротика:', error);
     }
 }
+
+bot.on('text', async (msg) => {
+    const chatId = msg.chat.id;
+
+    if (awaitingMultiplierInput !== null) {
+        const inputText = msg.text;
+        if (!isNaN(inputText) && parseFloat(inputText) >= 0 && parseFloat(inputText) <= 100) {
+            await handleMultiplyCommand(chatId, inputText);
+            awaitingMultiplierInput = null;
+        } else {
+            bot.sendMessage(chatId, 'Пожалуйста, введите корректное положительное число для множителя (не больше 100).');
+        }
+    }
+});
 
 function calculateDartResult(dartType) {
     switch (dartType) {
