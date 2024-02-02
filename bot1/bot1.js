@@ -217,7 +217,7 @@ bot.on('text', async (msg) => {
                 break;
             case `🚀 Множитель [x${k}]`:
                 bot.sendMessage(chatId, 'Введите новое значение множителя (не больше 100):');
-                awaitingMultiplierInput = userId;
+                global.awaitingMultiplierInput = userId;
                 break;
             case `💰 Баланс [${user.balance} 💎]`:
                 await handleBalanceCommand(chatId);
