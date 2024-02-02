@@ -249,7 +249,9 @@ bot.on('text', async (msg) => {
 
 //play buttons commands
 async function handleMultiplyCommand(chatId, inputText) {
+    console.log(`inputText: ${inputText}`);
     const multiplierValue = parseFloat(inputText);
+    console.log(`multiplierValue: ${multiplierValue}`);
     if (!isNaN(multiplierValue) && multiplierValue > 0 && multiplierValue <= 100) {
         k = multiplierValue;
         bot.sendMessage(chatId, `Множитель успешно установлен: x${k}`);
