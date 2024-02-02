@@ -93,7 +93,7 @@ async function handlePlayCommand(chatId, userId) {
 
     const keyboard = {
         keyboard: [
-            [{ text: '🎯 Бросить дротик' }],
+            [{ text: '🎯 Бросить дротик хуётик' }],
             [{ text: `💸 Ставка [${bet} 💎]` }, { text: `🚀 Множитель [x${k}]` }],
             [{ text: `💰 Баланс [${user.balance} 💎]` }, { text: '🏧 Валюта [💎]' }],
         ],
